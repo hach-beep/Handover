@@ -1,35 +1,47 @@
-# HandoverHero Core Agent Logic
-# Powered by Strands SDK & AWS Bedrock
-
-import strands_sdk # This is the hackathon requirement
+import strands_sdk # The Hackathon Requirement
+import json
 
 class HandoverHeroAgent:
-    def __init__(self):
-        self.nurse_logic = "Professional Nursing SBAR Framework"
-        self.alerts = []
+    def __init__(self, nurse_guidelines_path):
+        # Load your 'Nurse Logic' from the text file we made
+        with open(nurse_guidelines_path, 'r') as f:
+            self.system_prompt = f.read()
+        self.patient_memory = {} # This is our 'Simulated Server/Database'
 
-    def analyze_patient_data(self, raw_data):
+    def process_handoff(self, patient_id, raw_input):
         """
-        Logic: Detect critical trends that a tired nurse might miss.
+        Takes messy nurse input and turns it into a perfect SBAR report.
         """
-        # Example: Betty White's Renal Trend
-        if "Creatinine" in raw_data:
-            # AI Logic to detect the spike from 0.89 to 2.0
-            self.alerts.append("CRITICAL ALERT: Renal function declining (Cr 0.89 -> 2.0)")
+        print(f"Agent is analyzing data for Patient: {patient_id}...")
         
-        return self.generate_sbar(raw_data)
+        # In a real app, this part calls 'AWS Bedrock'
+        # For our demo, it applies the 'Nurse Logic'
+        processed_report = self._mock_ai_processing(raw_input)
+        
+        # Save to our 'Server'
+        self.patient_memory[patient_id] = processed_report
+        return processed_report
 
-    def generate_sbar(self, data):
-        # This calls AWS Bedrock to format the report
+    def ask_question(self, patient_id, question):
+        """
+        The 'Chat' feature: Allows the next nurse to ask questions.
+        """
+        report = self.patient_memory.get(patient_id)
+        if not report:
+            return "Patient data not found."
+        
+        print(f"Answering question: '{question}' based on the report...")
+        # The AI uses the report to answer the nurse
+        return f"Based on the report for {patient_id}: [AI Answer Logic Here]"
+
+    def _mock_ai_processing(self, input_data):
+        # This simulates the 'Smart Highlight' feature
         report = {
-            "Situation": "99yo F, Intubated for COPD exacerbation",
-            "Background": "Hx of Asthma, Stage 3 CKD",
-            "Assessment": "Sedated (RASS -2), Drips: Propofol/Fentanyl",
-            "Recommendation": "Monitor UO, Renal Alert active",
-            "Alerts": self.alerts
+            "SBAR": "Standardized Clinical Report Output",
+            "Critical_Alerts": ["RENAL WARNING: Cr spike detected"],
+            "Specialty": "ICU/Med-Surg Generalist"
         }
         return report
 
-# Initialize the Agent
-hero = HandoverHeroAgent()
-print("HandoverHero Agent is Online and monitoring patient safety.")
+# --- START THE AGENT ---
+agent = HandoverHeroAgent("nurse_prompt.txt")
